@@ -123,9 +123,12 @@ coverage: $(PATHC)index.html
 
 $(PATHC)index.html: test ## Compute code coverage and generate the report
 	gcov $(PATHO)/*.gcda
+	mv *.gcov $(PATHB)
+	
 	$(CLEANUP) $(PATHC)
 	mkdir $(PATHC)
-	lcov --capture --directory . --output-file $(PATHC)/coverage.info
+
+	lcov --capture --directory $(PATHB) --output-file $(PATHC)/coverage.info
 	genhtml $(PATHC)/coverage.info --output-directory $(PATHC)
 
 
