@@ -33,7 +33,7 @@ PATHB = build/
 PATHD = build/depends/
 PATHO = build/objs/
 PATHR = build/results/
-PATHC = build/coverage
+PATHC = build/coverage/
 
 BUILD_PATHS = $(PATHB) $(PATHD) $(PATHO) $(PATHR)
 
@@ -50,8 +50,11 @@ DEPEND = $(GCC) -MM -MG -MF
 
 CFLAGS = -I. -I$(PATHU) -I$(PATHS) -pedantic -Wall -Werror -Wuninitialized -Wshadow -Wwrite-strings -Wconversion -Wunreachable-code -D_POSIX_SOURCE -DTEST
 
+#
 # This assume that tests follow the Naming Convention Test<MODULE_NAME>.
 # For example, TestBlah.c, where Blah matches the file Blah.c
+# Public tests instead follow the Naming Conventio PublicTest<MODULE_NAME>
+#
 RESULTS = $(patsubst $(PATHT)Test%.c,$(PATHR)Test%.txt,$(SRCT))
 PRESULTS = $(patsubst $(PATHPT)PublicTest%.c,$(PATHR)PublicTest%.txt,$(SRCPT))
 
@@ -78,15 +81,14 @@ help: ## Makefile help
 	@echo "Available Commands:"
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
-
-test: $(BUILD_PATHS) $(RESULTS) $(PRESULTS) ## Visualize the test results
+test: $(BUILD_PATHS) $(RESULTS) $(PRESULTS) deps ## Visualize the test results
 	@echo "-----------------------\nIGNORES:\n-----------------------"
 	@echo "$(IGNORE)"
 	@echo "-----------------------\nFAILURES:\n-----------------------"
 	@echo "$(FAIL)"
 	@echo "-----------------------\nPASSED:\n-----------------------"
 	@echo "$(PASSED)"
-	@echo "\nDONE"
+	@echo "\n"
 
 
 deps: ## Install dependencies
@@ -102,8 +104,7 @@ endif
 
 
 dirs: $(PATHB) $(PATHD) $(PATHO) $(PATHR) ## Create build directories
-	@echo "Done"
-
+	@echo ""
 
 clean: ## Clean temp files
 	$(CLEANUP) $(PATHO)
@@ -116,7 +117,11 @@ lint: deps ## Reformat (Lint) the source code with clang-format
 	clang-format -i --style=LLVM $(PATHS)%.c $(PATHS)%.h
 
 
-coverage: deps ## Compute code coverage and generate the report
+coverage: $(PATHC)index.html
+	@echo ""
+	@echo "The coverage report is available here:" $(shell realpath --relative-to "$(WORKING_DIR)" "$(PATHC)index.html")
+
+$(PATHC)index.html: test ## Compute code coverage and generate the report
 	gcov $(PATHO)/*.gcda
 	$(CLEANUP) $(PATHC)
 	mkdir $(PATHC)
@@ -169,8 +174,9 @@ $(PATHO):
 $(PATHR):
 	$(MKDIR) $(PATHR)
 
-
+# Avoid those files are automatically deleted by make
 .PRECIOUS: $(PATHB)Test%.$(TARGET_EXTENSION)
+.PRECIOUS: $(PATHB)PublicTest%.$(TARGET_EXTENSION)
 .PRECIOUS: $(PATHD)%.d
 .PRECIOUS: $(PATHO)%.o
 .PRECIOUS: $(PATHR)%.txt
