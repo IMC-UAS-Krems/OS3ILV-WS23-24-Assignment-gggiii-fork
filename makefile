@@ -1,7 +1,7 @@
 # This makefile is based on http://www.throwtheswitch.org/build/make
 
 # Environmental variables
-MKFILE_DIR := $(abspath $(lastword $(MAKEFILE_LIST)))
+MKFILE_DIR := $(shell dirname "$(abspath $(lastword $(MAKEFILE_LIST)))")
 WORKING_DIR := $(shell pwd)
 
 # TODO Ensure that the makefile is NOT invoked from the public folder
@@ -79,8 +79,8 @@ endif
 ifndef CLANG_FORMAT
     $(INSTALLER) clang-format
 endif
-ifndef CLANG_FORMAT UNITY
-	$(info Unity not installed)
+ifndef UNITY
+	@echo "Unity not installed"
 endif
 
 
