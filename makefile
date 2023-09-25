@@ -80,7 +80,7 @@ ifndef CLANG_FORMAT
     $(INSTALLER) clang-format
 endif
 ifndef UNITY
-	@echo "Unity not installed"
+	git submodule add https://github.com/ThrowTheSwitch/Unity.git unity
 endif
 
 
