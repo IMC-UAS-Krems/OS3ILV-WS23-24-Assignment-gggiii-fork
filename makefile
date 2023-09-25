@@ -122,14 +122,14 @@ coverage: $(PATHC)index.html
 	@echo "The coverage report is available here:" $(shell realpath --relative-to "$(WORKING_DIR)" "$(PATHC)index.html")
 
 $(PATHC)index.html: test ## Compute code coverage and generate the report
-	gcov $(PATHO)/*.gcda
-	mv *.gcov $(PATHB)
+	@gcov $(PATHO)/*.gcda
+	@mv *.gcov $(PATHB)
 	
-	$(CLEANUP) $(PATHC)
-	mkdir $(PATHC)
+	@$(CLEANUP) $(PATHC)
+	@mkdir $(PATHC)
 
-	lcov --capture --directory $(PATHB) --output-file $(PATHC)/coverage.info
-	genhtml $(PATHC)/coverage.info --output-directory $(PATHC)
+	@lcov --capture --directory $(PATHB) --output-file $(PATHC)/coverage.info
+	@genhtml $(PATHC)/coverage.info --output-directory $(PATHC)
 
 
 ######
