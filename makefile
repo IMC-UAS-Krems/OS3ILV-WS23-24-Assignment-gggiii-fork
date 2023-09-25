@@ -16,7 +16,7 @@ ifeq ($(UNAME_S),Darwin)
 endif
 
 # Generic Commands
-RM = rm -f
+CLEANUP = rm -f
 MKDIR = mkdir -p
 TARGET_EXTENSION=out
 
@@ -52,6 +52,12 @@ LCOV := $(shell command -v lcov 2> /dev/null)
 CLANG_FORMAT := $(shell command -v clang-format 2> /dev/null)
 UNITY := $(shell [[ -d $(PATHU) ]] && echo "Unity")
 
+###### Declare Phonies
+
+.PHONY: help
+.PHONY: test
+.PHONY: deps
+.PHONY: clean
 
 ###### Targets start here 
 
@@ -119,6 +125,7 @@ $(PATHO)%.o:: $(PATHU)%.c $(PATHU)%.h
 $(PATHD)%.d:: $(PATHT)%.c
 	$(DEPEND) $@ $<
 
+# Make sure directories are there
 $(PATHB):
 	$(MKDIR) $(PATHB)
 
@@ -132,13 +139,12 @@ $(PATHR):
 	$(MKDIR) $(PATHR)
 
 
-
-
-
 .PRECIOUS: $(PATHB)Test%.$(TARGET_EXTENSION)
 .PRECIOUS: $(PATHD)%.d
 .PRECIOUS: $(PATHO)%.o
 .PRECIOUS: $(PATHR)%.txt
+
+
 
 
 
