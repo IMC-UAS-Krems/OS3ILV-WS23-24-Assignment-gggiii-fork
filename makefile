@@ -97,11 +97,10 @@ run: ## Run the project
 
 
 build: $(PATH_BIN)$(BIN_TARGET).$(TARGET_EXTENSION) $(PATH_BIN) ## Build the project
-	@echo "Building..."
+
 	
 ## Link compiled files
 $(PATH_BIN)$(BIN_TARGET).$(TARGET_EXTENSION): $(SRC_FILES_OUT)
-	@echo "Linking to file $@ from files: $<"
 	$(LINK) -o $@ $^
 
 ## Compile c files
@@ -109,7 +108,6 @@ $(PATH_BIN)%.o: $(PATHS)%.c
 	## Make sure directory exists
 	@mkdir -p $(dir $@)
 
-	@echo "Compiling file: $<"
 	$(COMPILE) $(CFLAGS) $< -o $@
 
 
