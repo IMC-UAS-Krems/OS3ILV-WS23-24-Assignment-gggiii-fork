@@ -1,5 +1,8 @@
 # This makefile is based on http://www.throwtheswitch.org/build/make
 
+# Set bash as default shell because bash syntax is used in this file
+SHELL := '/bin/bash'
+
 # Environmental variables
 MKFILE_DIR := $(shell dirname "$(abspath $(lastword $(MAKEFILE_LIST)))")
 WORKING_DIR := $(shell pwd)
@@ -21,6 +24,7 @@ MKDIR = mkdir -p
 GCC = gcc
 
 TARGET_EXTENSION=out
+BIN_TARGET=main
 
 # Project Structure
 PATHU = unity/src/
@@ -34,6 +38,7 @@ PATHD = build/depends/
 PATHO = build/objs/
 PATHR = build/results/
 PATHC = build/coverage/
+PATH_BIN = build/bin/
 
 BUILD_PATHS = $(PATHB) $(PATHD) $(PATHO) $(PATHR)
 
@@ -41,6 +46,9 @@ BUILD_PATHS = $(PATHB) $(PATHD) $(PATHO) $(PATHR)
 SRCT = $(wildcard $(PATHT)*.c)
 # Public Test source
 SRCPT = $(wildcard $(PATHPT)*.c)
+# Source files
+SRC_FILES = $(wildcard $(PATHS)*.c $(PATHS)**/*.c)
+
 
 
 COMPILE = $(GCC) -c
@@ -57,6 +65,7 @@ CFLAGS = -I. -I$(PATHU) -I$(PATHS) -pedantic -Wall -Werror -Wuninitialized -Wsha
 #
 RESULTS = $(patsubst $(PATHT)Test%.c,$(PATHR)Test%.txt,$(SRCT))
 PRESULTS = $(patsubst $(PATHPT)PublicTest%.c,$(PATHR)PublicTest%.txt,$(SRCPT))
+SRC_FILES_OUT = $(patsubst $(PATHS)%.c,$(PATH_BIN)%.o,$(SRC_FILES))
 
 PASSED = `grep -s PASS $(PATHR)*.txt`
 FAIL = `grep -s FAIL $(PATHR)*.txt`
@@ -72,6 +81,8 @@ UNITY := $(shell [[ -d $(PATHU) ]] && echo "Unity")
 .PHONY: test
 .PHONY: deps
 .PHONY: clean
+.PHONY: build
+.PHONY: run
 
 ###### Targets start here 
 
@@ -80,6 +91,27 @@ help: ## Makefile help
 	@echo "Working Directory: $(WORKING_DIR)"
 	@echo "Available Commands:"
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+
+run: ## Run the project
+	./$(PATH_BIN)$(BIN_TARGET).$(TARGET_EXTENSION)
+
+
+build: $(PATH_BIN)$(BIN_TARGET).$(TARGET_EXTENSION) $(PATH_BIN) ## Build the project
+	@echo "Building..."
+	
+## Link compiled files
+$(PATH_BIN)$(BIN_TARGET).$(TARGET_EXTENSION): $(SRC_FILES_OUT)
+	@echo "Linking to file $@ from files: $<"
+	$(LINK) -o $@ $^
+
+## Compile c files
+$(PATH_BIN)%.o: $(PATHS)%.c
+	## Make sure directory exists
+	@mkdir -p $(dir $@)
+
+	@echo "Compiling file: $<"
+	$(COMPILE) $(CFLAGS) $< -o $@
+
 
 test: $(BUILD_PATHS) $(RESULTS) $(PRESULTS) deps ## Visualize the test results
 	@echo "-----------------------\nIGNORES:\n-----------------------"
@@ -103,7 +135,7 @@ ifndef UNITY
 endif
 
 
-dirs: $(PATHB) $(PATHD) $(PATHO) $(PATHR) ## Create build directories
+dirs: $(PATHB) $(PATHD) $(PATHO) $(PATHR) $(PATH_BIN) ## Create build directories
 	@echo ""
 
 clean: ## Clean temp files
@@ -176,6 +208,9 @@ $(PATHO):
 
 $(PATHR):
 	$(MKDIR) $(PATHR)
+
+$(PATH_BIN):
+	$(MKDIR) $(PATH_BIN)
 
 # Avoid those files are automatically deleted by make
 .PRECIOUS: $(PATHB)Test%.$(TARGET_EXTENSION)
