@@ -92,12 +92,10 @@ help: ## Makefile help
 	@echo "Available Commands:"
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
-run: ## Run the project
+run: build ## Run the project
 	./$(PATH_BIN)$(BIN_TARGET).$(TARGET_EXTENSION)
 
-
 build: $(PATH_BIN)$(BIN_TARGET).$(TARGET_EXTENSION) $(PATH_BIN) ## Build the project
-
 	
 ## Link compiled files
 $(PATH_BIN)$(BIN_TARGET).$(TARGET_EXTENSION): $(SRC_FILES_OUT)
