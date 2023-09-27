@@ -1,9 +1,10 @@
 # This makefile is based on http://www.throwtheswitch.org/build/make
+SHELL := /bin/bash
 
 # Environmental variables
 MKFILE_DIR := $(shell dirname "$(abspath $(lastword $(MAKEFILE_LIST)))")
 WORKING_DIR := $(shell pwd)
-SHELL := /bin/bash
+
 # TODO Ensure that the makefile is NOT invoked from the public folder
 
 # OS-Specific Commands
