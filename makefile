@@ -108,6 +108,7 @@ endif
 dirs: $(PATHB) $(PATHD) $(PATHO) $(PATHR) ## Create build directories
 	@echo ""
 
+
 clean: ## Clean temp files
 	$(CLEANUP) $(PATHO)
 	$(CLEANUP) $(PATHB)*.$(TARGET_EXTENSION)
@@ -123,6 +124,8 @@ coverage: $(PATHC)index.html
 	@echo ""
 	@echo "The coverage report is available here:" $(shell realpath --relative-to "$(WORKING_DIR)" "$(PATHC)index.html")
 
+######
+
 $(PATHC)index.html: test ## Compute code coverage and generate the report
 	@gcov $(PATHO)/*.gcda
 	@mv *.gcov $(PATHB)
@@ -133,8 +136,7 @@ $(PATHC)index.html: test ## Compute code coverage and generate the report
 	@lcov --capture --directory $(PATHB) --output-file $(PATHC)/coverage.info
 	@genhtml $(PATHC)/coverage.info --output-directory $(PATHC)
 
-
-######
+# Run the tests
 $(PATHR)%.txt: $(PATHB)%.$(TARGET_EXTENSION)
 	-./$< > $@ 2>&1
 
