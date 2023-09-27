@@ -13,7 +13,7 @@ ifeq ($(UNAME_S),Linux)
 	INSTALLER = sudo apt-get update && sudo apt-get install -y
 endif
 ifeq ($(UNAME_S),Darwin)
-	INSTALLER = brew
+	INSTALLER = brew install
 endif
 
 # Generic Commands
