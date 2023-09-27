@@ -82,7 +82,7 @@ help: ## Makefile help
 	@echo "Available Commands:"
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
-test: $(BUILD_PATHS) $(RESULTS) $(PRESULTS) deps ## Visualize the test results
+test: deps $(BUILD_PATHS) $(RESULTS) $(PRESULTS) ## Visualize the test results
 	@echo "-----------------------\nIGNORES:\n-----------------------"
 	@echo "$(IGNORE)"
 	@echo "-----------------------\nFAILURES:\n-----------------------"
