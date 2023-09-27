@@ -3,7 +3,7 @@
 # Environmental variables
 MKFILE_DIR := $(shell dirname "$(abspath $(lastword $(MAKEFILE_LIST)))")
 WORKING_DIR := $(shell pwd)
-
+SHELL := /bin/bash
 # TODO Ensure that the makefile is NOT invoked from the public folder
 
 # OS-Specific Commands
@@ -76,6 +76,7 @@ UNITY := $(shell [[ -d $(PATHU) ]] && echo "Unity")
 ###### Targets start here 
 
 help: ## Makefile help
+	@echo "Shell in use " $(SHELL)
 	@echo "Makefile Location: $(MKFILE_DIR)"
 	@echo "Working Directory: $(WORKING_DIR)"
 	@echo "Available Commands:"
