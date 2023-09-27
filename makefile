@@ -94,10 +94,10 @@ test: deps $(BUILD_PATHS) $(RESULTS) $(PRESULTS) ## Visualize the test results
 
 deps: ## Install dependencies
 ifndef LCOV
-    $(INSTALLER) lcov
+	$(INSTALLER) lcov
 endif
 ifndef CLANG_FORMAT
-    $(INSTALLER) clang-format
+	$(INSTALLER) clang-format
 endif
 ifndef UNITY
 	git submodule add https://github.com/ThrowTheSwitch/Unity.git unity
