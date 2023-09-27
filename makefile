@@ -9,7 +9,7 @@ SHELL := /bin/bash
 # OS-Specific Commands
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
-	INSTALLER = sudo apt-get install
+	INSTALLER = sudo apt-get update && sudo apt-get install -y
 endif
 ifeq ($(UNAME_S),Darwin)
 	INSTALLER = brew
