@@ -11,9 +11,11 @@ WORKING_DIR := $(shell pwd)
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
 	INSTALLER = sudo apt-get update && sudo apt-get install -y
+	COVERAGE = $(shell realpath --relative-to "$(WORKING_DIR)" "$(PATHC)index.html")
 endif
 ifeq ($(UNAME_S),Darwin)
 	INSTALLER = brew install
+	COVERAGE = $(shell readlink -f "$(PATHC)index.html")
 endif
 
 # Generic Commands
@@ -122,7 +124,7 @@ lint: deps ## Reformat (Lint) the source code with clang-format
 
 coverage: $(PATHC)index.html
 	@echo ""
-	@echo "The coverage report is available here:" $(shell realpath --relative-to "$(WORKING_DIR)" "$(PATHC)index.html")
+	@echo "The coverage report is available here:" $(COVERAGE)
 
 ######
 
