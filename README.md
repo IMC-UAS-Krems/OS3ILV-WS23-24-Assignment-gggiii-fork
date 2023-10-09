@@ -66,7 +66,7 @@ If you are not familiar with developing and testing C programs you can google fo
 ## C Programming
 Here some refs about C programming:
 
-- [https://www.w3schools.com/c/](https://www.w3schools.com/c/)
+- [https://en.cppreference.com/w/](https://en.cppreference.com/w/)
 
 ## Make
 Here some refs about `make`:
