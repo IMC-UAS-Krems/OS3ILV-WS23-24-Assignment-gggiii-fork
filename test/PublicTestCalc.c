@@ -1,23 +1,23 @@
 #include "unity.h"
 #include "Calc.h"
 
-void setUp()
+void setUp(void)
 {
 
 }
 
-void tearDown()
+void tearDown(void)
 {
 
 }
 
-void test_subtract()
+void test_subtract(void)
 {
     int output = sub(20, 10);
     TEST_ASSERT_EQUAL(10, output);
 }
 
-void test_multiply()
+void test_multiply(void)
 {
     int output = mul(2, 10);
     TEST_ASSERT_EQUAL(20, output);

@@ -1,4 +1,5 @@
 # This makefile is based on http://www.throwtheswitch.org/build/make
+SHELL := /bin/bash
 
 
 # Environmental variables
@@ -10,10 +11,12 @@ WORKING_DIR := $(shell pwd)
 # OS-Specific Commands
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
-	INSTALLER = sudo apt-get install
+	INSTALLER = sudo apt-get update && sudo apt-get install -y
+	COVERAGE = $(shell realpath --relative-to "$(WORKING_DIR)" "$(PATHC)index.html")
 endif
 ifeq ($(UNAME_S),Darwin)
-	INSTALLER = brew
+	INSTALLER = brew install
+	COVERAGE = $(shell readlink -f "$(PATHC)index.html")
 endif
 
 # Generic Commands
@@ -85,10 +88,12 @@ UNITY := $(shell [[ -d $(PATHU) ]] && echo "Unity")
 ###### Targets start here 
 
 help: ## Makefile help
+	@echo "Shell in use " $(SHELL)
 	@echo "Makefile Location: $(MKFILE_DIR)"
 	@echo "Working Directory: $(WORKING_DIR)"
 	@echo "Available Commands:"
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+
 
 run-client: build ## Run the client
 	./$(PATHB)$(BIN_TARGET).$(TARGET_EXTENSION) --client
@@ -104,8 +109,7 @@ $(PATHB)$(BIN_TARGET).$(TARGET_EXTENSION): $(SRC_FILES_OUT)
 	$(LINK) -o $@ $^
 	@echo "Linking complete!"
 
-
-test: $(BUILD_PATHS) $(RESULTS) $(PRESULTS) deps ## Visualize the test results
+test: deps $(BUILD_PATHS) $(RESULTS) $(PRESULTS) ## Visualize the test results
 	@echo "-----------------------\nIGNORES:\n-----------------------"
 	@echo "$(IGNORE)"
 	@echo "-----------------------\nFAILURES:\n-----------------------"
@@ -117,10 +121,10 @@ test: $(BUILD_PATHS) $(RESULTS) $(PRESULTS) deps ## Visualize the test results
 
 deps: ## Install dependencies
 ifndef LCOV
-    $(INSTALLER) lcov
+	$(INSTALLER) lcov
 endif
 ifndef CLANG_FORMAT
-    $(INSTALLER) clang-format
+	$(INSTALLER) clang-format
 endif
 ifndef UNITY
 	git submodule add https://github.com/ThrowTheSwitch/Unity.git unity
@@ -129,6 +133,7 @@ endif
 
 dirs: $(PATHB) $(PATHD) $(PATHO) $(PATHR) ## Create build directories
 	@echo ""
+
 
 clean: ## Clean temp files
 	$(CLEANUP) $(PATHO)
@@ -143,7 +148,9 @@ lint: deps ## Reformat (Lint) the source code with clang-format
 
 coverage: $(PATHC)index.html
 	@echo ""
-	@echo "The coverage report is available here:" $(shell realpath --relative-to "$(WORKING_DIR)" "$(PATHC)index.html")
+	@echo "The coverage report is available here:" $(COVERAGE)
+
+######
 
 $(PATHC)index.html: test ## Compute code coverage and generate the report
 	@gcov $(PATHO)/*.gcda
@@ -155,8 +162,7 @@ $(PATHC)index.html: test ## Compute code coverage and generate the report
 	@lcov --capture --directory $(PATHB) --output-file $(PATHC)/coverage.info
 	@genhtml $(PATHC)/coverage.info --output-directory $(PATHC)
 
-
-######
+# Run the tests
 $(PATHR)%.txt: $(PATHB)%.$(TARGET_EXTENSION)
 	-./$< > $@ 2>&1
 
