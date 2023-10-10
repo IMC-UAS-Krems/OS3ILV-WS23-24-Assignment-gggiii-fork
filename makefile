@@ -1,7 +1,5 @@
 # This makefile is based on http://www.throwtheswitch.org/build/make
 
-# Set bash as default shell because bash syntax is used in this file
-SHELL := '/bin/bash'
 
 # Environmental variables
 MKFILE_DIR := $(shell dirname "$(abspath $(lastword $(MAKEFILE_LIST)))")
@@ -38,7 +36,6 @@ PATHD = build/depends/
 PATHO = build/objs/
 PATHR = build/results/
 PATHC = build/coverage/
-PATH_BIN = build/bin/
 
 BUILD_PATHS = $(PATHB) $(PATHD) $(PATHO) $(PATHR)
 
@@ -47,7 +44,7 @@ SRCT = $(wildcard $(PATHT)*.c)
 # Public Test source
 SRCPT = $(wildcard $(PATHPT)*.c)
 # Source files
-SRC_FILES = $(wildcard $(PATHS)*.c $(PATHS)**/*.c)
+SRC_FILES = $(wildcard $(PATHS)*.c $(PATHS)**/*.c $(PATHS)**/**/*.c $(PATHS)**/**/**/*.c)
 
 
 
@@ -65,7 +62,7 @@ CFLAGS = -I. -I$(PATHU) -I$(PATHS) -pedantic -Wall -Werror -Wuninitialized -Wsha
 #
 RESULTS = $(patsubst $(PATHT)Test%.c,$(PATHR)Test%.txt,$(SRCT))
 PRESULTS = $(patsubst $(PATHPT)PublicTest%.c,$(PATHR)PublicTest%.txt,$(SRCPT))
-SRC_FILES_OUT = $(patsubst $(PATHS)%.c,$(PATH_BIN)%.o,$(SRC_FILES))
+SRC_FILES_OUT = $(patsubst $(PATHS)%.c,$(PATHO)%.o,$(SRC_FILES))
 
 PASSED = `grep -s PASS $(PATHR)*.txt`
 FAIL = `grep -s FAIL $(PATHR)*.txt`
@@ -82,7 +79,8 @@ UNITY := $(shell [[ -d $(PATHU) ]] && echo "Unity")
 .PHONY: deps
 .PHONY: clean
 .PHONY: build
-.PHONY: run
+.PHONY: run-client
+.PHONY: run-server
 
 ###### Targets start here 
 
@@ -92,21 +90,19 @@ help: ## Makefile help
 	@echo "Available Commands:"
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
-run: build ## Run the project
-	./$(PATH_BIN)$(BIN_TARGET).$(TARGET_EXTENSION)
+run-client: build ## Run the client
+	./$(PATHB)$(BIN_TARGET).$(TARGET_EXTENSION) --client
 
-build: $(PATH_BIN)$(BIN_TARGET).$(TARGET_EXTENSION) $(PATH_BIN) ## Build the project
+run-server: build ## Run server
+	./$(PATHB)$(BIN_TARGET).$(TARGET_EXTENSION) --server
+
+build: $(PATHB)$(BIN_TARGET).$(TARGET_EXTENSION) $(PATHO) ## Build the project
 	
 ## Link compiled files
-$(PATH_BIN)$(BIN_TARGET).$(TARGET_EXTENSION): $(SRC_FILES_OUT)
+$(PATHB)$(BIN_TARGET).$(TARGET_EXTENSION): $(SRC_FILES_OUT)
+	@echo "Linking $@ from $^"
 	$(LINK) -o $@ $^
-
-## Compile c files
-$(PATH_BIN)%.o: $(PATHS)%.c
-	## Make sure directory exists
-	@mkdir -p $(dir $@)
-
-	$(COMPILE) $(CFLAGS) $< -o $@
+	@echo "Linking complete!"
 
 
 test: $(BUILD_PATHS) $(RESULTS) $(PRESULTS) deps ## Visualize the test results
@@ -131,7 +127,7 @@ ifndef UNITY
 endif
 
 
-dirs: $(PATHB) $(PATHD) $(PATHO) $(PATHR) $(PATH_BIN) ## Create build directories
+dirs: $(PATHB) $(PATHD) $(PATHO) $(PATHR) ## Create build directories
 	@echo ""
 
 clean: ## Clean temp files
@@ -182,6 +178,7 @@ $(PATHO)%.o:: $(PATHPT)%.c
 
 # Build Source - Note that we add coverage instrumentation here
 $(PATHO)%.o:: $(PATHS)%.c
+	$(MKDIR) -p $(@D)
 	$(COMPILE_WITH_COVERAGE) $(CFLAGS) $< -o $@
 
 # Build Unity
