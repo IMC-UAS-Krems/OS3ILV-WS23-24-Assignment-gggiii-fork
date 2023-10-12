@@ -1,6 +1,7 @@
 # This makefile is based on http://www.throwtheswitch.org/build/make
 SHELL := /bin/bash
 
+
 # Environmental variables
 MKFILE_DIR := $(shell dirname "$(abspath $(lastword $(MAKEFILE_LIST)))")
 WORKING_DIR := $(shell pwd)
@@ -24,6 +25,7 @@ MKDIR = mkdir -p
 GCC = gcc
 
 TARGET_EXTENSION=out
+BIN_TARGET=main
 
 # Project Structure
 PATHU = unity/src/
@@ -44,6 +46,9 @@ BUILD_PATHS = $(PATHB) $(PATHD) $(PATHO) $(PATHR)
 SRCT = $(wildcard $(PATHT)*.c)
 # Public Test source
 SRCPT = $(wildcard $(PATHPT)*.c)
+# Source files
+SRC_FILES = $(wildcard $(PATHS)*.c $(PATHS)**/*.c $(PATHS)**/**/*.c $(PATHS)**/**/**/*.c)
+
 
 
 COMPILE = $(GCC) -c
@@ -60,6 +65,7 @@ CFLAGS = -I. -I$(PATHU) -I$(PATHS) -pedantic -Wall -Werror -Wuninitialized -Wsha
 #
 RESULTS = $(patsubst $(PATHT)Test%.c,$(PATHR)Test%.txt,$(SRCT))
 PRESULTS = $(patsubst $(PATHPT)PublicTest%.c,$(PATHR)PublicTest%.txt,$(SRCPT))
+SRC_FILES_OUT = $(patsubst $(PATHS)%.c,$(PATHO)%.o,$(SRC_FILES))
 
 PASSED = `grep -s PASS $(PATHR)*.txt`
 FAIL = `grep -s FAIL $(PATHR)*.txt`
@@ -75,6 +81,9 @@ UNITY := $(shell [[ -d $(PATHU) ]] && echo "Unity")
 .PHONY: test
 .PHONY: deps
 .PHONY: clean
+.PHONY: build
+.PHONY: run-client
+.PHONY: run-server
 
 ###### Targets start here 
 
@@ -84,6 +93,21 @@ help: ## Makefile help
 	@echo "Working Directory: $(WORKING_DIR)"
 	@echo "Available Commands:"
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+
+
+run-client: build ## Run the client
+	./$(PATHB)$(BIN_TARGET).$(TARGET_EXTENSION) --client
+
+run-server: build ## Run server
+	./$(PATHB)$(BIN_TARGET).$(TARGET_EXTENSION) --server
+
+build: $(PATHB)$(BIN_TARGET).$(TARGET_EXTENSION) $(PATHO) ## Build the project
+	
+## Link compiled files
+$(PATHB)$(BIN_TARGET).$(TARGET_EXTENSION): $(SRC_FILES_OUT)
+	@echo "Linking $@ from $^"
+	$(LINK) -o $@ $^
+	@echo "Linking complete!"
 
 test: deps $(BUILD_PATHS) $(RESULTS) $(PRESULTS) ## Visualize the test results
 	@echo "-----------------------\nIGNORES:\n-----------------------"
@@ -160,6 +184,7 @@ $(PATHO)%.o:: $(PATHPT)%.c
 
 # Build Source - Note that we add coverage instrumentation here
 $(PATHO)%.o:: $(PATHS)%.c
+	$(MKDIR) -p $(@D)
 	$(COMPILE_WITH_COVERAGE) $(CFLAGS) $< -o $@
 
 # Build Unity
@@ -182,6 +207,9 @@ $(PATHO):
 
 $(PATHR):
 	$(MKDIR) $(PATHR)
+
+$(PATH_BIN):
+	$(MKDIR) $(PATH_BIN)
 
 # Avoid those files are automatically deleted by make
 .PRECIOUS: $(PATHB)Test%.$(TARGET_EXTENSION)
